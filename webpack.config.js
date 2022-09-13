@@ -1,6 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const { resolve } = require('path');
 
 let appPath = path.resolve(__dirname, 'src/app');
 let serverPath = path.resolve(__dirname, 'src/server');
@@ -80,7 +81,11 @@ module.exports = {
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.jsx', '.css'],
     alias: {
-      '@': appPath + '/src',
+      '@app': path.resolve(__dirname, 'src/app'),
+      "@containers": path.resolve(__dirname, 'src/app/containers'),
+      '@components': path.resolve(__dirname, 'src/app/components'),
+      "@containers": path.resolve(__dirname, 'src/app/containers'),
+      "@reducers": path.resolve(__dirname, 'src/app/reducers'),
     },
   },
   plugins: [

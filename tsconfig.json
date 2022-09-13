@@ -19,9 +19,13 @@
     "resolveJsonModule": true,
     "isolatedModules": false,
     "jsx": "react",
-    "baseUrl": ".",
+    "baseUrl": "./src",
     "paths": {
-      "@/*": ["src/*"]
+      "@app/*": ["app/*"],
+      "@server/*": ["server/*"],
+      "@containers/*": ["app/containers/*"],
+      "@components/*": ["app/components/*"],
+      "@reducers/*": ["app/reducers/*"],
     }
   },
   "include": [
