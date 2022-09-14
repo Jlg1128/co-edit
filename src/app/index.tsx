@@ -2,9 +2,13 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import Count from '@containers/counter';
-import MainEditor from './editor';
 import store from './store';
+import MainEditor from './editor';
+import undoManager from './undoManager';
 
+undoManager.init(store.dispatch);
+// @ts-ignore
+window.undoManager = undoManager;
 const App = () => (
   <div>
     <Count />

@@ -9,7 +9,7 @@ export default function Counter() {
     <div>
       count:
       {count}
-      <button onClick={() => dispatch(increment())}>点击</button>
+      <button onClick={() => dispatch({ type: 'counter/increment', payload: {canUndo: true} })}>点击</button>
     </div>
   );
 }

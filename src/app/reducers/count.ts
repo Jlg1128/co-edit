@@ -1,4 +1,7 @@
+import undoManager from '@app/undoManager';
 import { createSlice } from '@reduxjs/toolkit';
+import lodash from 'lodash';
+
 
 const counterSlice = createSlice({
   name: 'counter',
@@ -6,7 +9,12 @@ const counterSlice = createSlice({
     value: 0,
   },
   reducers: {
-    increment: (state) => {
+    increment(state) {
+      let action = arguments[1];
+      if (action.payload && action.payload.canUndo) {
+        console.log('undoAction', action);
+        undoManager.addUndo(state, action);
+      }
       // Redux Toolkit allows us to write "mutating" logic in reducers. It
       // doesn't actually mutate the state because it uses the Immer library,
       // which detects changes to a "draft state" and produces a brand new

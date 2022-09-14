@@ -89,6 +89,7 @@
     "quote-props": 0,
     "no-nested-ternary": 0,
     "jsx-a11y/media-has-caption": 0,
+    "prefer-rest-params": 0,
     "react/jsx-curly-newline": 0,
     "no-tabs": 0,
     "react/destructuring-assignment": 0,
