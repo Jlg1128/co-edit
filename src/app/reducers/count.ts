@@ -2,7 +2,6 @@ import undoManager from '@app/undoManager';
 import { createSlice } from '@reduxjs/toolkit';
 import lodash from 'lodash';
 
-
 const counterSlice = createSlice({
   name: 'counter',
   initialState: {
