@@ -6,9 +6,7 @@ import store from './store';
 import MainEditor from './editor';
 import undoManager from './undoManager';
 
-undoManager.init(store.dispatch);
-// @ts-ignore
-window.undoManager = undoManager;
+undoManager.init(store);
 const App = () => (
   <div>
     <Count />

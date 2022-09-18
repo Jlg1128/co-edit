@@ -1,20 +1,7 @@
-import lodash from 'lodash';
-
 const undoManager = {
-  undoStack: [
-    // {
-    //   state: {
-
-    //   },
-    //   action: {
-    //     type: '',
-    //     payload: '',
-    //   },
-    // },
-  ],
-  dispatch: null,
-  init(dispatch) {
-    this.dispatch = dispatch;
+  store: null,
+  init(store) {
+    this.store = store;
     this.bindEvents();
   },
   bindEvents() {
@@ -26,40 +13,21 @@ const undoManager = {
         let { key } = e;
         key = key.toLowerCase();
         if (key === 'z' && e.shiftKey) {
-          console.log('redo');
           this.redo();
         } else if (key === 'z') {
-          console.log('undo');
           this.undo();
         }
       }
     });
   },
-  redoStack: [],
   undo() {
-    if (this.undoStack.length) {
-      let { state, action } = this.undoStack.pop();
-      console.log({ state, action });
-      // this.dispatch({
-      //   type:
-      // })
-    }
-  },
-  redo() {
-
-  },
-  addUndo(state, action) {
-    let newState = lodash.cloneDeep(state);
-    this.undoStack.push({
-      state: newState,
-      action,
+    this.store.dispatch({
+      type: 'UNDO',
     });
   },
-  addRedo(state, action) {
-    let newState = lodash.cloneDeep(state);
-    this.redoStack.push({
-      state: newState,
-      action,
+  redo() {
+    this.store.dispatch({
+      type: 'REDO',
     });
   },
 };
