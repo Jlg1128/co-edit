@@ -12,12 +12,14 @@
   "license": "ISC",
   "dependencies": {
     "@reduxjs/toolkit": "^1.8.5",
+    "@slate-yjs/core": "^0.2.8",
     "lodash": "^4.17.21",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-redux": "^8.0.2",
     "slate": "^0.82.1",
-    "slate-react": "^0.82.2"
+    "slate-react": "^0.82.2",
+    "yjs": "^13.5.41"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.185",

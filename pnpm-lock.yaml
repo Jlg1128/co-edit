@@ -2,6 +2,7 @@ lockfileVersion: 5.4
 
 specifiers:
   '@reduxjs/toolkit': ^1.8.5
+  '@slate-yjs/core': ^0.2.8
   '@types/lodash': ^4.14.185
   '@types/node': ^18.7.16
   '@types/react': ^18.0.19
@@ -33,15 +34,18 @@ specifiers:
   webpack: ^5.74.0
   webpack-cli: ^4.10.0
   webpack-dev-server: ^4.11.0
+  yjs: ^13.5.41
 
 dependencies:
   '@reduxjs/toolkit': 1.8.5_kkwg4cbsojnjnupd3btipussee
+  '@slate-yjs/core': 0.2.8_slate@0.82.1+yjs@13.5.41
   lodash: 4.17.21
   react: 18.2.0
   react-dom: 18.2.0_react@18.2.0
   react-redux: 8.0.2_uyfbmxhdwfup574gfu3al6lriq
   slate: 0.82.1
   slate-react: 0.82.2_lryiyh7uo2ykhysveiorwwrgwa
+  yjs: 13.5.41
 
 devDependencies:
   '@types/lodash': 4.14.185
@@ -222,6 +226,17 @@ packages:
       redux: 4.2.0
       redux-thunk: 2.4.1_redux@4.2.0
       reselect: 4.1.6
+    dev: false
+
+  /@slate-yjs/core/0.2.8_slate@0.82.1+yjs@13.5.41:
+    resolution: {integrity: sha512-F8TamTNVNEbEfoWo0RGSHLZJ5s9713znJ185xJXDhl38n61iot1NIh813EoLG+YDawLYBA5uwp8Z6qTs7d8nTw==}
+    peerDependencies:
+      slate: '>=0.70.0'
+      yjs: ^13.5.29
+    dependencies:
+      slate: 0.82.1
+      y-protocols: 1.0.5
+      yjs: 13.5.41
     dev: false
 
   /@types/body-parser/1.19.2:
@@ -2573,6 +2588,10 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: true
 
+  /isomorphic.js/0.2.5:
+    resolution: {integrity: sha512-PIeMbHqMt4DnUP3MA/Flc0HElYjMXArsw1qwJZcm9sqR8mq3l8NYizFMty0pWwE/tzIGH3EKK5+jes5mAr85yw==}
+    dev: false
+
   /jest-worker/27.5.1:
     resolution: {integrity: sha512-7vuh85V5cdDofPyxn58nrPjBktZo0u9x1g8WtjQol+jZDaE+fhN+cIvTj11GndBnMnyfrUOG1sZQxCdjKh+DKg==}
     engines: {node: '>= 10.13.0'}
@@ -2689,6 +2708,13 @@ packages:
       prelude-ls: 1.2.1
       type-check: 0.4.0
     dev: true
+
+  /lib0/0.2.52:
+    resolution: {integrity: sha512-CjxlM7UgICfN6b2OPALBXchIBiNk6jE+1g7JP8ha+dh1xKRDSYpH0WQl1+rMqCju49xUnwPG34v4CR5/rPOZhg==}
+    engines: {node: '>=14'}
+    dependencies:
+      isomorphic.js: 0.2.5
+    dev: false
 
   /loader-runner/4.3.0:
     resolution: {integrity: sha512-3R/1M+yS3j5ou80Me59j7F9IMs4PXs3VqRrm0TU3AbKPxlmpoY1TNscJV/oGJXo8qCatFGTfDbY6W6ipGOYXfg==}
@@ -4314,6 +4340,18 @@ packages:
         optional: true
     dev: true
 
+  /y-protocols/1.0.5:
+    resolution: {integrity: sha512-Wil92b7cGk712lRHDqS4T90IczF6RkcvCwAD0A2OPg+adKmOe+nOiT/N2hvpQIWS3zfjmtL4CPaH5sIW1Hkm/A==}
+    dependencies:
+      lib0: 0.2.52
+    dev: false
+
   /yallist/4.0.0:
     resolution: {integrity: sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==}
     dev: true
+
+  /yjs/13.5.41:
+    resolution: {integrity: sha512-4eSTrrs8OeI0heXKKioRY4ag7V5Bk85Z4MeniUyown3o3y0G7G4JpAZWrZWfTp7pzw2b53GkAQWKqHsHi9j9JA==}
+    dependencies:
+      lib0: 0.2.52
+    dev: false
