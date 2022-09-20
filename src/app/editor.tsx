@@ -1,9 +1,9 @@
 import React, { useState, useCallback, useMemo, useEffect, useImperativeHandle } from 'react';
-
+import { HocuspocusProvider } from '@hocuspocus/provider';
 import { createEditor, Transforms, Editor, Text, Descendant, Element } from 'slate';
 import { Slate, Editable, withReact } from 'slate-react';
 // Import the core binding
-import { withYjs, slateNodesToInsertDelta, YjsEditor } from '@slate-yjs/core';
+import { withYjs, slateNodesToInsertDelta, YjsEditor, withYHistory } from '@slate-yjs/core';
 
 // Import yjs
 import * as Y from 'yjs';
@@ -20,21 +20,36 @@ const DefaultElement = (props: any) => <p {...props.attributes}>{props.children}
 const initialValue = [
   {
     type: 'paragraph',
-    children: [{ text: 'A line of text in a paragraph.' }],
+    children: [{ text: 'A line of text in a paragraphaa.' }],
   },
 ];
+// let yDoc1 = new Y.Doc();
+// let yDoc2 = new Y.Doc();
+// const ymap1 = yDoc1.getMap('map1');
+// const yText = yDoc1.getText('name');
+// ymap1.observe(event => {
+//   console.log('changes', event.changes.keys);
+// });
+// yText.observe(event => {
+//   console.log('text changes', event.changes);
+// });
+
+// yDoc1.on('update', (update) => {
+//   console.log(update);
+//   Y.applyUpdate(yDoc2, update);
+// });
+const yDoc = new Y.Doc();
+
 const MainEditor = () => {
-  const [editor] = useState(() => withReact(createEditor()));
   const sharedType = useMemo(() => {
-    const yDoc = new Y.Doc();
     // Load the initial value into the yjs document
     let actualSharedType = yDoc.get('content', Y.XmlText);
     // @ts-ignore
-    console.log('actualSharedType', actualSharedType.applyDelta);
-    // @ts-ignore
     actualSharedType.applyDelta(slateNodesToInsertDelta(initialValue));
-    return actualSharedType;
+    return actualSharedType as Y.XmlText;
   }, []);
+
+  const editor = useMemo(() => withYjs(withReact(createEditor()), sharedType), []);
 
   const renderElement = useCallback((props: any) => {
     switch (props.element.type) {
@@ -45,6 +60,10 @@ const MainEditor = () => {
     }
   }, []);
 
+  useEffect(() => {
+    YjsEditor.connect(editor);
+    return () => YjsEditor.disconnect(editor);
+  }, [editor]);
   // Define a React component to render leaves with bold text.
   const Leaf = (props: any) => (
     <span
@@ -60,12 +79,18 @@ const MainEditor = () => {
     <div>
       <button onClick={(e) => {
         e.preventDefault();
-        Transforms.select(editor, {
-          anchor: { path: [0, 0], offset: 0 },
-          focus: { path: [0, 0], offset: 5 },
-        });
+        // Transforms.select(editor, {
+        //   anchor: { path: [0, 0], offset: 0 },
+        //   focus: { path: [0, 0], offset: 5 },
+        // });
+        let text = yDoc.getText('我是a');
+        text.insert(0, 'hhha');
       }}>
-        点击
+        点击更新yDoc1
+      </button>
+      <button onClick={(e) => {
+      }}>
+        点击获取Ydoc2
       </button>
       <Slate
         editor={editor}
