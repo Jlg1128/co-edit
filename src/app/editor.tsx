@@ -1,13 +1,14 @@
 import React, { useState, useCallback, useMemo, useEffect, useImperativeHandle } from 'react';
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import { createEditor, Transforms, Editor, Text, Descendant, Element } from 'slate';
-import { Slate, Editable, withReact } from 'slate-react';
+import { Slate, Editable, withReact, useFocused } from 'slate-react';
 // Import the core binding
-import { withYjs, slateNodesToInsertDelta, YjsEditor, withYHistory } from '@slate-yjs/core';
+import { withYjs, slateNodesToInsertDelta, YjsEditor, withYHistory, withCursors } from '@slate-yjs/core';
 
 // Import yjs
 import * as Y from 'yjs';
 import { YText } from 'yjs/dist/src/internals';
+import { withMarkdown } from './plugins';
 
 // Define a React component renderer for our code blocks.
 const CodeElement = (props: any) => (
@@ -40,6 +41,9 @@ const initialValue = [
 // });
 const yDoc = new Y.Doc();
 
+// @ts-ignore
+window.yDoc = yDoc;
+
 const MainEditor = () => {
   const sharedType = useMemo(() => {
     // Load the initial value into the yjs document
@@ -49,7 +53,12 @@ const MainEditor = () => {
     return actualSharedType as Y.XmlText;
   }, []);
 
-  const editor = useMemo(() => withYjs(withReact(createEditor()), sharedType), []);
+  const editor = useMemo(() => withYHistory(withYjs(withReact(createEditor()), sharedType)), []);
+
+  useEffect(() => {
+    // @ts-ignore
+    window.editor = editor;
+  }, []);
 
   const renderElement = useCallback((props: any) => {
     switch (props.element.type) {
