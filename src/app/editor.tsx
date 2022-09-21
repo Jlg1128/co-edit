@@ -43,8 +43,15 @@ const yDoc = new Y.Doc();
 
 // @ts-ignore
 window.yDoc = yDoc;
+// @ts-ignore
+window.Y = Y;
+// @ts-ignore
+window.slateNodesToInsertDelta = slateNodesToInsertDelta;
+// @ts-ignore
+window.Transforms = Transforms;
 
 const MainEditor = () => {
+  const [value, setValue] = useState(initialValue || []);
   const sharedType = useMemo(() => {
     // Load the initial value into the yjs document
     let actualSharedType = yDoc.get('content', Y.XmlText);
@@ -58,6 +65,8 @@ const MainEditor = () => {
   useEffect(() => {
     // @ts-ignore
     window.editor = editor;
+    // @ts-ignore
+    window.sharedType = sharedType;
   }, []);
 
   const renderElement = useCallback((props: any) => {
@@ -103,18 +112,10 @@ const MainEditor = () => {
       </button>
       <Slate
         editor={editor}
-        value={initialValue}
-        onChange={(value: Descendant[]) => {
-          const isAstChange = editor.operations.some(
-            (op: any) => op.type !== 'set_selection',
-          );
-          console.log('editor.operations', editor.operations);
-          console.log('value', value);
-          if (isAstChange) {
-            // Save the value to Local Storage.
-            const content = JSON.stringify(value);
-            localStorage.setItem('content', content);
-          }
+        value={value}
+        onChange={(_value) => {
+          // @ts-ignore
+          setValue(_value);
         }}
       >
         <Editable
