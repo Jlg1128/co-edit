@@ -12,9 +12,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@hocuspocus/extension-logger": "1.0.0-alpha.80",
-    "@hocuspocus/provider": "1.0.0-alpha.40",
-    "@hocuspocus/server": "1.0.0-alpha.106",
     "@reduxjs/toolkit": "^1.8.5",
     "@slate-yjs/core": "^0.2.8",
     "lodash": "^4.17.21",

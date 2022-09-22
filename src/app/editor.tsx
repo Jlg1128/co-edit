@@ -2,6 +2,7 @@ import React, { useState, useCallback, useMemo, useEffect, useImperativeHandle }
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import { createEditor, Transforms, Editor, Text, Descendant, Element } from 'slate';
 import { Slate, Editable, withReact, useFocused } from 'slate-react';
+import { WebsocketProvider } from 'y-websocket';
 // Import the core binding
 import { withYjs, slateNodesToInsertDelta, YjsEditor, withYHistory, withCursors } from '@slate-yjs/core';
 
@@ -39,8 +40,14 @@ const initialValue = [
 //   console.log(update);
 //   Y.applyUpdate(yDoc2, update);
 // });
+
 const yDoc = new Y.Doc();
 
+const wsProvider = new WebsocketProvider('ws://localhost:1234', 'my-roomname', yDoc);
+
+// wsProvider.on('status', event => {
+//   console.log(event.status); // logs "connected" or "disconnected"
+// });
 // @ts-ignore
 window.yDoc = yDoc;
 // @ts-ignore
