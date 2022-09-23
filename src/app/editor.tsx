@@ -10,6 +10,7 @@ import { withYjs, slateNodesToInsertDelta, YjsEditor, withYHistory, withCursors 
 import * as Y from 'yjs';
 import { YText } from 'yjs/dist/src/internals';
 import { withMarkdown } from './plugins';
+import './index.less';
 
 // Define a React component renderer for our code blocks.
 const CodeElement = (props: any) => (
@@ -25,29 +26,9 @@ const initialValue = [
     children: [{ text: 'A line of text in a paragraphaa.' }],
   },
 ];
-// let yDoc1 = new Y.Doc();
-// let yDoc2 = new Y.Doc();
-// const ymap1 = yDoc1.getMap('map1');
-// const yText = yDoc1.getText('name');
-// ymap1.observe(event => {
-//   console.log('changes', event.changes.keys);
-// });
-// yText.observe(event => {
-//   console.log('text changes', event.changes);
-// });
-
-// yDoc1.on('update', (update) => {
-//   console.log(update);
-//   Y.applyUpdate(yDoc2, update);
-// });
 
 const yDoc = new Y.Doc();
 
-const wsProvider = new WebsocketProvider('ws://localhost:1234', 'my-roomname', yDoc);
-
-// wsProvider.on('status', event => {
-//   console.log(event.status); // logs "connected" or "disconnected"
-// });
 // @ts-ignore
 window.yDoc = yDoc;
 // @ts-ignore
@@ -100,23 +81,51 @@ const MainEditor = () => {
   );
 
   const renderLeaf = useCallback((props: any) => <Leaf {...props} />, []);
+  function handleSetElement(type) {
+    if (type === 'B') {
+      Transforms.setNodes(
+        editor,
+        { bold: true },
+        { match: n => {
+          console.log('n', n, Text.isText(n));
+          return Text.isText(n);
+        }, split: true },
+      );
+    } else if (type === 'I') {
+
+    } else if (type === 'Code') {
+      Transforms.setNodes(
+        editor,
+        { type: 'code' },
+        { match: n => Editor.isBlock(editor, n) },
+      );
+    } else if (type === 'Paragraph') {
+      Transforms.setNodes(
+        editor,
+        { type: 'paragraph' },
+        { match: n => Editor.isBlock(editor, n) },
+      );
+    }
+  }
   return (
     <div>
-      <button onClick={(e) => {
+      <div className='buttons-wrap'>
+        <button onClick={() => handleSetElement('B')}>B</button>
+        <button onClick={() => handleSetElement('I')}>I</button>
+        <button onClick={() => handleSetElement('Code')}>Code</button>
+        <button onClick={() => handleSetElement('Paragraph')}>Paragraph</button>
+      </div>
+      {/* <button onClick={(e) => {
         e.preventDefault();
-        // Transforms.select(editor, {
-        //   anchor: { path: [0, 0], offset: 0 },
-        //   focus: { path: [0, 0], offset: 5 },
-        // });
+        Transforms.select(editor, {
+          anchor: { path: [0, 0], offset: 0 },
+          focus: { path: [0, 0], offset: 5 },
+        });
         let text = yDoc.getText('我是a');
         text.insert(0, 'hhha');
       }}>
         点击更新yDoc1
-      </button>
-      <button onClick={(e) => {
-      }}>
-        点击获取Ydoc2
-      </button>
+      </button> */}
       <Slate
         editor={editor}
         value={value}
@@ -129,38 +138,9 @@ const MainEditor = () => {
           renderElement={renderElement}
           renderLeaf={renderLeaf}
           onKeyDown={(event: any) => {
-            if (!event.ctrlKey) {
-              return;
-            }
-            if (event.key === '`') {
+            if (event.key === '&') {
               event.preventDefault();
-              // Determine whether any of the currently selected blocks are code blocks.
-              const [match] = Editor.nodes(editor, {
-                match: (n) => n.type === 'code',
-              });
-              // Toggle the block type depending on whether there's already a match.
-              Transforms.setNodes(
-                editor,
-                { type: match ? 'paragraph' : 'code' },
-                { match: (n: any) => Editor.isBlock(editor, n) },
-              );
-            } else if (event.key === 'b') {
-              event.preventDefault();
-              const [match] = Editor.nodes(editor, {
-                match: (n) => Text.isText(n) && n.bold,
-              });
-              Transforms.setNodes(
-                editor,
-                { bold: !match },
-                { match: (n: any) => {
-                  console.log('n', n.bold);
-                  console.log('nentity', n);
-                  console.log('🦊', Element.isElement(n));
-                  console.log('block', Editor.isBlock(editor, n));
-                  return Text.isText(n);
-                },
-                split: true },
-              );
+              editor.insertText('and');
             }
           }}
        />

@@ -9,7 +9,6 @@ import undoManager from './undoManager';
 undoManager.init(store);
 const App = () => (
   <div>
-    <Count />
     <MainEditor />
   </div>
 );
