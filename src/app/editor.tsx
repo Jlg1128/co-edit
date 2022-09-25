@@ -1,7 +1,6 @@
 import React, { useState, useCallback, useMemo, useEffect, useImperativeHandle } from 'react';
-import { HocuspocusProvider } from '@hocuspocus/provider';
 import { createEditor, Transforms, Editor, Text, Descendant, Element } from 'slate';
-import { Slate, Editable, withReact, useFocused } from 'slate-react';
+import { Slate, Editable, withReact, useFocused, useSlate } from 'slate-react';
 import { WebsocketProvider } from 'y-websocket';
 // Import the core binding
 import { withYjs, slateNodesToInsertDelta, YjsEditor, withYHistory, withCursors } from '@slate-yjs/core';
@@ -9,6 +8,7 @@ import { withYjs, slateNodesToInsertDelta, YjsEditor, withYHistory, withCursors 
 // Import yjs
 import * as Y from 'yjs';
 import { YText } from 'yjs/dist/src/internals';
+import names from 'classnames';
 import { withMarkdown } from './plugins';
 import './index.less';
 
@@ -20,10 +20,98 @@ const CodeElement = (props: any) => (
 );
 
 const DefaultElement = (props: any) => <p {...props.attributes}>{props.children}</p>;
-const initialValue = [
+
+const isBlockActive = (editor, format, blockType = 'type') => {
+  const { selection } = editor;
+  if (!selection) return false;
+
+  const [match] = Array.from(
+    Editor.nodes(editor, {
+      at: Editor.unhangRange(editor, selection),
+      match: n => !Editor.isEditor(n)
+        && Element.isElement(n)
+        && n[blockType] === format,
+    }),
+  );
+
+  return !!match;
+};
+
+const toggleBlock = (editor, format) => {
+  const isActive = isBlockActive(
+    editor,
+    format,
+  );
+
+  console.log('isActive', isActive);
+  console.log('format', format);
+
+  // Transforms.unwrapNodes(editor, {
+  //   match: n => !Editor.isEditor(n)
+  //   && Element.isElement(n),
+  //   split: true,
+  // });
+  let newProperties;
+  newProperties = {
+    type: isActive ? 'paragraph' : format,
+  };
+  Transforms.setNodes(editor, newProperties);
+};
+
+const BlockButton = ({ format }) => {
+  const editor = useSlate();
+  return (
+    <button
+      className={names({ 'active': isBlockActive(
+        editor,
+        format,
+      ) })}
+      onMouseDown={event => {
+        event.preventDefault();
+        toggleBlock(editor, format);
+      }}
+    >
+      引号
+    </button>
+  );
+};
+
+const initialValue: Descendant[] = [
   {
     type: 'paragraph',
-    children: [{ text: 'A line of text in a paragraphaa.' }],
+    children: [
+      { text: 'This is editable ' },
+      { text: 'rich', bold: true },
+      { text: ' text, ' },
+      // @ts-ignore
+      { text: 'much', italic: true },
+      { text: ' better than a ' },
+      // @ts-ignore
+      { text: '<textarea>', code: true },
+      { text: '!' },
+    ],
+  },
+  {
+    type: 'paragraph',
+    children: [
+      {
+        text:
+          "Since it's rich text, you can do things like turn a selection of text ",
+      },
+      { text: 'bold', bold: true },
+      {
+        text:
+          ', or add a semantically rendered block quote in the middle of the page, like this:',
+      },
+    ],
+  },
+  {
+    type: 'block-quote',
+    children: [{ text: 'A wise quote.' }],
+  },
+  {
+    type: 'paragraph',
+    children: [{ text: 'Try it out for yourself!' }],
   },
 ];
 
@@ -61,6 +149,12 @@ const MainEditor = () => {
     switch (props.element.type) {
       case 'code':
         return <CodeElement {...props} />;
+      case 'block-quote':
+        return (
+          <blockquote {...props.attributes}>
+            {props.children}
+          </blockquote>
+        );
       default:
         return <DefaultElement {...props} />;
     }
@@ -71,50 +165,52 @@ const MainEditor = () => {
     return () => YjsEditor.disconnect(editor);
   }, [editor]);
   // Define a React component to render leaves with bold text.
-  const Leaf = (props: any) => (
-    <span
-        {...props.attributes}
-        style={{ fontWeight: props.leaf.bold ? 'bold' : 'normal' }}
-      >
-      {props.children}
-    </span>
-  );
+  const Leaf = ({ attributes, children, leaf }) => {
+    console.log(leaf);
+
+    if (leaf.bold) {
+      children = <strong>{children}</strong>;
+    }
+
+    if (leaf.code) {
+      children = <code>{children}</code>;
+    }
+
+    if (leaf.italic) {
+      children = <em>{children}</em>;
+    }
+
+    if (leaf.underline) {
+      children = <u>{children}</u>;
+    }
+
+    return <span {...attributes}>{children}</span>;
+  };
 
   const renderLeaf = useCallback((props: any) => <Leaf {...props} />, []);
-  function handleSetElement(type) {
-    if (type === 'B') {
-      Transforms.setNodes(
-        editor,
-        { bold: true },
-        { match: n => {
-          console.log('n', n, Text.isText(n));
-          return Text.isText(n);
-        }, split: true },
-      );
-    } else if (type === 'I') {
-
-    } else if (type === 'Code') {
-      Transforms.setNodes(
-        editor,
-        { type: 'code' },
-        { match: n => Editor.isBlock(editor, n) },
-      );
-    } else if (type === 'Paragraph') {
-      Transforms.setNodes(
-        editor,
-        { type: 'paragraph' },
-        { match: n => Editor.isBlock(editor, n) },
-      );
+  function handleSetElement(format) {
+    if (isMarkActive(format)) {
+      editor.removeMark(format);
+    } else {
+      editor.addMark(format, true);
     }
   }
+
+  const isMarkActive = (format) => {
+    const marks = Editor.marks(editor);
+    return marks ? marks[format] === true : false;
+  };
+  function formatActive(format) {
+    const [match] = Array.from(Editor.nodes(editor, {
+      at: editor.selection,
+      match: (node) => !Editor.isEditor(node) && (Element.isElement(node) || Text.isText(node)) && node[format] === true,
+    }));
+    console.log('match', match, format);
+
+    return !!match;
+  }
   return (
-    <div>
-      <div className='buttons-wrap'>
-        <button onClick={() => handleSetElement('B')}>B</button>
-        <button onClick={() => handleSetElement('I')}>I</button>
-        <button onClick={() => handleSetElement('Code')}>Code</button>
-        <button onClick={() => handleSetElement('Paragraph')}>Paragraph</button>
-      </div>
+    <div className='editor-wrapper'>
       {/* <button onClick={(e) => {
         e.preventDefault();
         Transforms.select(editor, {
@@ -131,9 +227,15 @@ const MainEditor = () => {
         value={value}
         onChange={(_value) => {
           // @ts-ignore
-          setValue(_value);
+          setValue({ ..._value });
         }}
       >
+        <div className='buttons-wrap'>
+          <button onMouseDown={e => e.preventDefault()} className={names({ 'active': isMarkActive('bold') })} onClick={() => handleSetElement('bold')}>B</button>
+          <button onMouseDown={e => e.preventDefault()} className={names({ 'active': isMarkActive('italic') })} onClick={() => handleSetElement('italic')}>I</button>
+          <button onMouseDown={e => e.preventDefault()} onClick={() => handleSetElement('code')}>Code</button>
+          <BlockButton format='block-quote' />
+        </div>
         <Editable
           renderElement={renderElement}
           renderLeaf={renderLeaf}
