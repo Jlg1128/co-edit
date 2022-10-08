@@ -77,6 +77,9 @@ module.exports = {
       },
       port: 8899,
       historyApiFallback: true,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+      }
   },
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.jsx', '.css'],

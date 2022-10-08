@@ -42,15 +42,6 @@ const toggleBlock = (editor, format) => {
     editor,
     format,
   );
-
-  console.log('isActive', isActive);
-  console.log('format', format);
-
-  // Transforms.unwrapNodes(editor, {
-  //   match: n => !Editor.isEditor(n)
-  //   && Element.isElement(n),
-  //   split: true,
-  // });
   let newProperties;
   newProperties = {
     type: isActive ? 'paragraph' : format,
@@ -71,7 +62,7 @@ const BlockButton = ({ format }) => {
         toggleBlock(editor, format);
       }}
     >
-      引号
+      引用
     </button>
   );
 };
@@ -136,13 +127,16 @@ const MainEditor = () => {
     return actualSharedType as Y.XmlText;
   }, []);
 
-  const editor = useMemo(() => withYHistory(withYjs(withReact(createEditor()), sharedType)), []);
+  const editor = useMemo(() => withYjs(withReact(createEditor()), sharedType), []);
+  // const editor = useMemo(() => withReact(createEditor()), []);
 
   useEffect(() => {
     // @ts-ignore
     window.editor = editor;
     // @ts-ignore
     window.sharedType = sharedType;
+    // @ts-ignore
+    window.YjsEditor = YjsEditor;
   }, []);
 
   const renderElement = useCallback((props: any) => {
@@ -166,8 +160,6 @@ const MainEditor = () => {
   }, [editor]);
   // Define a React component to render leaves with bold text.
   const Leaf = ({ attributes, children, leaf }) => {
-    console.log(leaf);
-
     if (leaf.bold) {
       children = <strong>{children}</strong>;
     }
@@ -200,15 +192,7 @@ const MainEditor = () => {
     const marks = Editor.marks(editor);
     return marks ? marks[format] === true : false;
   };
-  function formatActive(format) {
-    const [match] = Array.from(Editor.nodes(editor, {
-      at: editor.selection,
-      match: (node) => !Editor.isEditor(node) && (Element.isElement(node) || Text.isText(node)) && node[format] === true,
-    }));
-    console.log('match', match, format);
 
-    return !!match;
-  }
   return (
     <div className='editor-wrapper'>
       {/* <button onClick={(e) => {
