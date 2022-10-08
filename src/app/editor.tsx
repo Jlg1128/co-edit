@@ -19,6 +19,29 @@ const CodeElement = (props: any) => (
   </pre>
 );
 
+const yDoc1 = new Y.Doc();
+const yDoc2 = new Y.Doc();
+
+yDoc1.on('update', (update, origin) => {
+  console.log('origin', origin);
+  // @ts-ignore
+  Y.applyUpdate(yDoc2, update);
+});
+
+yDoc2.on('update', (update, origin) => {
+  console.log('update', update);
+  // @ts-ignore
+  Y.applyUpdate(yDoc1, update);
+});
+
+// @ts-ignore
+window.yDoc1 = yDoc1;
+// @ts-ignore
+window.yDoc2 = yDoc2;
+
+// @ts-ignore
+window.editorC = Editor;
+
 const DefaultElement = (props: any) => <p {...props.attributes}>{props.children}</p>;
 
 const isBlockActive = (editor, format, blockType = 'type') => {
@@ -68,38 +91,38 @@ const BlockButton = ({ format }) => {
 };
 
 const initialValue: Descendant[] = [
-  {
-    type: 'paragraph',
-    children: [
-      { text: 'This is editable ' },
-      { text: 'rich', bold: true },
-      { text: ' text, ' },
-      // @ts-ignore
-      { text: 'much', italic: true },
-      { text: ' better than a ' },
-      // @ts-ignore
-      { text: '<textarea>', code: true },
-      { text: '!' },
-    ],
-  },
-  {
-    type: 'paragraph',
-    children: [
-      {
-        text:
-          "Since it's rich text, you can do things like turn a selection of text ",
-      },
-      { text: 'bold', bold: true },
-      {
-        text:
-          ', or add a semantically rendered block quote in the middle of the page, like this:',
-      },
-    ],
-  },
-  {
-    type: 'block-quote',
-    children: [{ text: 'A wise quote.' }],
-  },
+  // {
+  //   type: 'paragraph',
+  //   children: [
+  //     { text: 'This is editable ' },
+  //     { text: 'rich', bold: true },
+  //     { text: ' text, ' },
+  //     // @ts-ignore
+  //     { text: 'much', italic: true },
+  //     { text: ' better than a ' },
+  //     // @ts-ignore
+  //     { text: '<textarea>', code: true },
+  //     { text: '!' },
+  //   ],
+  // },
+  // {
+  //   type: 'paragraph',
+  //   children: [
+  //     {
+  //       text:
+  //         "Since it's rich text, you can do things like turn a selection of text ",
+  //     },
+  //     { text: 'bold', bold: true },
+  //     {
+  //       text:
+  //         ', or add a semantically rendered block quote in the middle of the page, like this:',
+  //     },
+  //   ],
+  // },
+  // {
+  //   type: 'block-quote',
+  //   children: [{ text: 'A wise quote.' }],
+  // },
   {
     type: 'paragraph',
     children: [{ text: 'Try it out for yourself!' }],
@@ -127,8 +150,8 @@ const MainEditor = () => {
     return actualSharedType as Y.XmlText;
   }, []);
 
-  const editor = useMemo(() => withYjs(withReact(createEditor()), sharedType), []);
-  // const editor = useMemo(() => withReact(createEditor()), []);
+  // const editor = useMemo(() => withYHistory(withYjs(withReact(createEditor()), sharedType)), []);
+  const editor = useMemo(() => withReact(createEditor()), []);
 
   useEffect(() => {
     // @ts-ignore
@@ -154,10 +177,10 @@ const MainEditor = () => {
     }
   }, []);
 
-  useEffect(() => {
-    YjsEditor.connect(editor);
-    return () => YjsEditor.disconnect(editor);
-  }, [editor]);
+  // useEffect(() => {
+  //   YjsEditor.connect(editor);
+  //   return () => YjsEditor.disconnect(editor);
+  // }, [editor]);
   // Define a React component to render leaves with bold text.
   const Leaf = ({ attributes, children, leaf }) => {
     if (leaf.bold) {
@@ -192,7 +215,39 @@ const MainEditor = () => {
     const marks = Editor.marks(editor);
     return marks ? marks[format] === true : false;
   };
+  function formatActive(format) {
+    const [match] = Array.from(Editor.nodes(editor, {
+      at: editor.selection,
+      match: (node) => !Editor.isEditor(node) && (Element.isElement(node) || Text.isText(node)) && node[format] === true,
+    }));
+    console.log('match', match, format);
 
+    return !!match;
+  }
+
+  function addNode() {
+    editor.apply({
+      type: 'insert_node',
+      path: [0],
+      node: {
+        type: 'paragraph',
+        bold: true,
+        // @ts-ignore
+        children: [{ text: 'Try it out for yourself!' }],
+      },
+    });
+  }
+
+  function insertYDocText() {
+    yDoc1.transact(() => {
+      let text = yDoc1.getText('content');
+      text.insert(0, '123');
+    }, 'jlg');
+    yDoc2.transact(() => {
+      let text = yDoc2.getText('content');
+      text.insert(0, '456');
+    }, 'jlg');
+  }
   return (
     <div className='editor-wrapper'>
       {/* <button onClick={(e) => {
@@ -210,6 +265,7 @@ const MainEditor = () => {
         editor={editor}
         value={value}
         onChange={(_value) => {
+          console.log('changes', _value);
           // @ts-ignore
           setValue({ ..._value });
         }}
@@ -219,6 +275,8 @@ const MainEditor = () => {
           <button onMouseDown={e => e.preventDefault()} className={names({ 'active': isMarkActive('italic') })} onClick={() => handleSetElement('italic')}>I</button>
           <button onMouseDown={e => e.preventDefault()} onClick={() => handleSetElement('code')}>Code</button>
           <BlockButton format='block-quote' />
+          <button onMouseDown={e => e.preventDefault()} onClick={() => addNode()}>添加节点</button>
+          <button onClick={() => insertYDocText()}>yDoc Text</button>
         </div>
         <Editable
           renderElement={renderElement}

@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack-dev-server --mode development --hot --config webpack.config.js",
-    "server": "nodemon ./src/server/index.ts"
+    "server": "nodemon ./src/server/index.ts",
+    "sync": "sh sync.sh"
   },
   "keywords": [],
   "author": "",
