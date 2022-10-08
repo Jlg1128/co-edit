@@ -3,7 +3,7 @@ import { createEditor, Transforms, Editor, Text, Descendant, Element } from 'sla
 import { Slate, Editable, withReact, useFocused, useSlate } from 'slate-react';
 import { WebsocketProvider } from 'y-websocket';
 // Import the core binding
-import { withYjs, slateNodesToInsertDelta, YjsEditor, withYHistory, withCursors } from '@slate-yjs/core';
+import { withYjs, slateNodesToInsertDelta, YjsEditor, withYHistory, withCursors, yTextToSlateElement } from '@slate-yjs/core';
 
 // Import yjs
 import * as Y from 'yjs';
@@ -41,6 +41,8 @@ window.yDoc2 = yDoc2;
 
 // @ts-ignore
 window.editorC = Editor;
+// @ts-ignore
+window.yTextToSlateElement = yTextToSlateElement;
 
 const DefaultElement = (props: any) => <p {...props.attributes}>{props.children}</p>;
 
@@ -147,11 +149,12 @@ const MainEditor = () => {
     let actualSharedType = yDoc.get('content', Y.XmlText);
     // @ts-ignore
     actualSharedType.applyDelta(slateNodesToInsertDelta(initialValue));
+
     return actualSharedType as Y.XmlText;
   }, []);
 
-  // const editor = useMemo(() => withYHistory(withYjs(withReact(createEditor()), sharedType)), []);
-  const editor = useMemo(() => withReact(createEditor()), []);
+  const editor = useMemo(() => withYjs(withReact(createEditor()), sharedType), []);
+  // const editor = useMemo(() => withReact(createEditor()), []);
 
   useEffect(() => {
     // @ts-ignore
@@ -177,10 +180,10 @@ const MainEditor = () => {
     }
   }, []);
 
-  // useEffect(() => {
-  //   YjsEditor.connect(editor);
-  //   return () => YjsEditor.disconnect(editor);
-  // }, [editor]);
+  useEffect(() => {
+    YjsEditor.connect(editor);
+    return () => YjsEditor.disconnect(editor);
+  }, [editor]);
   // Define a React component to render leaves with bold text.
   const Leaf = ({ attributes, children, leaf }) => {
     if (leaf.bold) {
