@@ -141,6 +141,11 @@ window.Y = Y;
 window.slateNodesToInsertDelta = slateNodesToInsertDelta;
 // @ts-ignore
 window.Transforms = Transforms;
+const wsProvider = new WebsocketProvider('ws://localhost:1234', 'my-roomname', yDoc);
+
+wsProvider.on('status', event => {
+  console.log(event.status) // logs "connected" or "disconnected"
+});
 
 const MainEditor = () => {
   const [value, setValue] = useState(initialValue || []);
