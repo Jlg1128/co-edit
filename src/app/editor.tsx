@@ -18,27 +18,6 @@ const CodeElement = (props: any) => (
     <code>{props.children}</code>
   </pre>
 );
-
-const yDoc1 = new Y.Doc();
-const yDoc2 = new Y.Doc();
-
-yDoc1.on('update', (update, origin) => {
-  console.log('origin', origin);
-  // @ts-ignore
-  Y.applyUpdate(yDoc2, update);
-});
-
-yDoc2.on('update', (update, origin) => {
-  console.log('update', update);
-  // @ts-ignore
-  Y.applyUpdate(yDoc1, update);
-});
-
-// @ts-ignore
-window.yDoc1 = yDoc1;
-// @ts-ignore
-window.yDoc2 = yDoc2;
-
 // @ts-ignore
 window.editorC = Editor;
 // @ts-ignore
@@ -246,16 +225,6 @@ const MainEditor = () => {
     });
   }
 
-  function insertYDocText() {
-    yDoc1.transact(() => {
-      let text = yDoc1.getText('content');
-      text.insert(0, '123');
-    }, 'jlg');
-    yDoc2.transact(() => {
-      let text = yDoc2.getText('content');
-      text.insert(0, '456');
-    }, 'jlg');
-  }
   return (
     <div className='editor-wrapper'>
       {/* <button onClick={(e) => {
@@ -274,7 +243,6 @@ const MainEditor = () => {
         value={value}
         onChange={(_value) => {
           console.log('changes', _value);
-          // @ts-ignore
           setValue({ ..._value });
         }}
       >
@@ -284,7 +252,6 @@ const MainEditor = () => {
           <button onMouseDown={e => e.preventDefault()} onClick={() => handleSetElement('code')}>Code</button>
           <BlockButton format='block-quote' />
           <button onMouseDown={e => e.preventDefault()} onClick={() => addNode()}>添加节点</button>
-          <button onClick={() => insertYDocText()}>yDoc Text</button>
         </div>
         <Editable
           renderElement={renderElement}
