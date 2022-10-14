@@ -2,9 +2,10 @@
   "ts-node": {
     "compilerOptions": {
       "module": "CommonJS"
-    }
+    },
   },
   "compilerOptions": {
+    "sourceMap": true,
     "experimentalDecorators": true,
     "target": "ES6",
     "lib": [
