@@ -2,12 +2,14 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import * as Y from 'yjs';
 import './textarea.less';
+import textAreaSyncToYText from './textAreaSyncToYText';
 
 const TEXT_NAME = 'textarea-demo';
 
+const initialValue = 'temp1111';
 function TextAreaEditor() {
   const textareaRef = useRef<HTMLTextAreaElement>();
-  const [value, setValue] = useState('temp1111');
+  const [value, setValue] = useState(initialValue);
 
   const { yDoc, yText } = useMemo(() => {
     const _yDoc = new Y.Doc();
@@ -16,6 +18,7 @@ function TextAreaEditor() {
     window.doc = _yDoc;
     // @ts-ignore
     window.yText = _yText;
+    _yText.insert(0, initialValue);
     return { yDoc: _yDoc, yText: _yText };
   }, []);
 
@@ -27,14 +30,12 @@ function TextAreaEditor() {
     if (yText) {
       yText.observe(observeHandler);
     }
+    const unlisten = textAreaSyncToYText({yText, textarea: textareaRef.current});
     return () => {
       yText.unobserve(observeHandler);
+      unlisten();
     };
-  }, [yText]);
-
-  useEffect(() => {
-
-  }, [value]);
+  }, []);
 
   function onTextChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
     console.log('textChange', e);
