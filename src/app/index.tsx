@@ -3,13 +3,15 @@ import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import Count from '@containers/counter';
 import store from './store';
-import MainEditor from './editor';
+// import MainEditor from './editor';
+import TextAreaEditor from './textareaEditor/textarea';
 import undoManager from './undoManager';
 
 undoManager.init(store);
 const App = () => (
   <div>
-    <MainEditor />
+    <TextAreaEditor />
+    {/* <MainEditor /> */}
   </div>
 );
 
