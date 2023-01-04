@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { text } from 'stream/consumers';
 import * as Y from 'yjs';
 import { IndexeddbPersistence } from 'y-indexeddb';
+import { WebsocketProvider } from 'y-websocket';
 
 type SyncProps = {
   yText: Y.Text,
@@ -33,6 +32,13 @@ function textAreaSyncToYText({yText, textarea, undoManager, db}: SyncProps) {
 
   const yDoc = yText.doc;
 
+  function yTextObserveHandler(event: Y.YTextEvent, transaction: Y.Transaction) {
+    const origin = transaction.origin;
+    if (origin instanceof WebsocketProvider) {
+      textarea.value = yText.toString();
+    }
+  }
+
   function handleInput(e: InputEvent) {
     const {inputType, data} = e;
     console.log('InputEvent', e);
@@ -45,11 +51,11 @@ function textAreaSyncToYText({yText, textarea, undoManager, db}: SyncProps) {
           yText.delete(range[0], deleteLength);
         }
         yText.insert(range[0], data);
-      });
+      }, yDoc.clientID);
     } else if (inputType.startsWith('delete')) {
       yDoc.transact(() => {
         yText.delete(newRange[0], val.length - newVal.length);
-      });
+      }, yDoc.clientID);
     } else if (inputType === 'historyUndo') {
       undoManager.undo();
     } else if (inputType === 'historyRedo') {
@@ -64,8 +70,6 @@ function textAreaSyncToYText({yText, textarea, undoManager, db}: SyncProps) {
     setVal();
   }
 
-  // yDoc.on('update', (a, b) => {console.log(a, b)});
-
   if (textarea) {
     textarea.addEventListener('input', handleInput);
     textarea.addEventListener('keydown', handleKeyDown);
@@ -75,11 +79,13 @@ function textAreaSyncToYText({yText, textarea, undoManager, db}: SyncProps) {
     // @ts-ignore
     window.idbPersistence = idbPersistence;
     textarea.value = yText.toString();
+    yText.observe(yTextObserveHandler);
   });
 
   return () => {
     textarea.removeEventListener('input', handleInput);
     textarea.removeEventListener('keydown', handleKeyDown);
+    yText.unobserve(yTextObserveHandler);
   };
 }
 

@@ -20,11 +20,6 @@ function TextAreaEditor() {
   const {yText, undoManager} = useYText({name: TEXT_NAME, defaultValue: initialValue, doc});
 
   useEffect(() => {
-    function observeHandler(event: Y.YTextEvent, transaction: Y.Transaction) {
-      // console.log('event', event);
-      // console.log('origin', transaction.origin);
-    }
-    yText.observe(observeHandler);
     const db = new IndexeddbPersistence('textAreaDemo', doc);
     const wsProvider = new WebsocketProvider('ws://localhost:1234', ROOM_NAME, doc, {connect: true});
 
@@ -38,9 +33,8 @@ function TextAreaEditor() {
 
     const unlisten = textAreaSyncToYText({yText, textarea: textareaRef.current, undoManager, db});
     return () => {
-      yText.unobserve(observeHandler);
-      unlisten();
       wsProvider.destroy();
+      unlisten();
     };
   }, []);
 

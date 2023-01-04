@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack-dev-server --mode development --hot --config webpack.config.js",
     "server": "nodemon ./node_modules/.pnpm/y-websocket@1.4.5_yjs@13.5.41/node_modules/y-websocket/bin/server.js",
-    "server:demo": "HOST=localhost PORT=1234 npx y-websocket",
+    "server:demo": "npx y-websocket HOST=localhost PORT=1234",
     "sync": "sh sync.sh"
   },
   "keywords": [],
