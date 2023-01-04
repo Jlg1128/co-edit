@@ -3,34 +3,27 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import * as Y from 'yjs';
 import './textarea.less';
 import textAreaSyncToYText from './textAreaSyncToYText';
+import useYText from './useYText';
 
 const TEXT_NAME = 'textarea-demo';
 
-const initialValue = 'temp1111';
+const doc = new Y.Doc();
+// @ts-ignore
+window.doc = doc;
+const initialValue = 'textarea demo playground xxxx';
 function TextAreaEditor() {
   const textareaRef = useRef<HTMLTextAreaElement>();
   const [value, setValue] = useState(initialValue);
 
-  const { yDoc, yText } = useMemo(() => {
-    const _yDoc = new Y.Doc();
-    const _yText = _yDoc.getText(TEXT_NAME);
-    // @ts-ignore
-    window.doc = _yDoc;
-    // @ts-ignore
-    window.yText = _yText;
-    _yText.insert(0, initialValue);
-    return { yDoc: _yDoc, yText: _yText };
-  }, []);
+  const {yText, undoManager} = useYText({name: TEXT_NAME, defaultValue: initialValue, doc});
 
   useEffect(() => {
     function observeHandler(event: Y.YTextEvent, transaction: Y.Transaction) {
-      console.log('event', event);
-      console.log('origin', transaction.origin);
+      // console.log('event', event);
+      // console.log('origin', transaction.origin);
     }
-    if (yText) {
-      yText.observe(observeHandler);
-    }
-    const unlisten = textAreaSyncToYText({yText, textarea: textareaRef.current});
+    yText.observe(observeHandler);
+    const unlisten = textAreaSyncToYText({yText, textarea: textareaRef.current, undoManager});
     return () => {
       yText.unobserve(observeHandler);
       unlisten();

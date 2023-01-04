@@ -2,9 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { text } from 'stream/consumers';
 import * as Y from 'yjs';
 
-// 1.textArea input event，判断插入还是删除，如果是插入，判断之前的selection range是否包含
-// 2.
-function textAreaSyncToYText({yText, textarea}: {yText: Y.Text, textarea: HTMLTextAreaElement}) {
+type SyncProps = {
+  yText: Y.Text,
+  textarea: HTMLTextAreaElement,
+  undoManager: Y.UndoManager,
+}
+
+function textAreaSyncToYText({yText, textarea, undoManager}: SyncProps) {
   let range = [0, 0];
 
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -29,6 +33,9 @@ function textAreaSyncToYText({yText, textarea}: {yText: Y.Text, textarea: HTMLTe
 
   function handleInput(e: InputEvent) {
     const {inputType, data} = e;
+    console.log('InputEvent', e);
+    const newVal = getVal();
+    const newRange = getRange();
     if (inputType.startsWith('insert')) {
       yDoc.transact(() => {
         if (range[0] !== range[1]) {
@@ -38,12 +45,16 @@ function textAreaSyncToYText({yText, textarea}: {yText: Y.Text, textarea: HTMLTe
         yText.insert(range[0], data);
       }, yDoc.clientID);
     } else if (inputType.startsWith('delete')) {
-      const newVal = getVal();
-      const newRange = getRange();
       yDoc.transact(() => {
         yText.delete(newRange[0], val.length - newVal.length);
       }, yDoc.clientID);
+    } else if (inputType === 'historyUndo') {
+      undoManager.undo();
+    } else if (inputType === 'historyRedo') {
+      undoManager.redo();
     }
+    textarea.value = yText.toString();
+    textarea.setSelectionRange(newRange[0], newRange[1]);
     console.log('yText', yText.toJSON());
   }
   function handleKeyDown(e: KeyboardEvent) {
@@ -51,7 +62,7 @@ function textAreaSyncToYText({yText, textarea}: {yText: Y.Text, textarea: HTMLTe
     setVal();
   }
 
-  yDoc.on('update', (a, b) => {console.log(a, b)});
+  // yDoc.on('update', (a, b) => {console.log(a, b)});
 
   if (textarea) {
     textarea.addEventListener('input', handleInput);
