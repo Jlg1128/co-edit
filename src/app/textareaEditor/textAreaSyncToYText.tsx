@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { text } from 'stream/consumers';
 import * as Y from 'yjs';
+import { IndexeddbPersistence } from 'y-indexeddb';
 
 type SyncProps = {
   yText: Y.Text,
   textarea: HTMLTextAreaElement,
   undoManager: Y.UndoManager,
+  db: IndexeddbPersistence,
 }
 
-function textAreaSyncToYText({yText, textarea, undoManager}: SyncProps) {
+function textAreaSyncToYText({yText, textarea, undoManager, db}: SyncProps) {
   let range = [0, 0];
 
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -43,11 +45,11 @@ function textAreaSyncToYText({yText, textarea, undoManager}: SyncProps) {
           yText.delete(range[0], deleteLength);
         }
         yText.insert(range[0], data);
-      }, yDoc.clientID);
+      });
     } else if (inputType.startsWith('delete')) {
       yDoc.transact(() => {
         yText.delete(newRange[0], val.length - newVal.length);
-      }, yDoc.clientID);
+      });
     } else if (inputType === 'historyUndo') {
       undoManager.undo();
     } else if (inputType === 'historyRedo') {
@@ -68,6 +70,12 @@ function textAreaSyncToYText({yText, textarea, undoManager}: SyncProps) {
     textarea.addEventListener('input', handleInput);
     textarea.addEventListener('keydown', handleKeyDown);
   }
+
+  db.on('synced', (idbPersistence: IndexeddbPersistence) => {
+    // @ts-ignore
+    window.idbPersistence = idbPersistence;
+    textarea.value = yText.toString();
+  });
 
   return () => {
     textarea.removeEventListener('input', handleInput);

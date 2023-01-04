@@ -7,6 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack-dev-server --mode development --hot --config webpack.config.js",
     "server": "nodemon ./node_modules/.pnpm/y-websocket@1.4.5_yjs@13.5.41/node_modules/y-websocket/bin/server.js",
+    "server:demo": "HOST=localhost PORT=1234 npx y-websocket",
     "sync": "sh sync.sh"
   },
   "keywords": [],
@@ -22,6 +23,7 @@
     "react-redux": "^8.0.2",
     "slate": "^0.82.1",
     "slate-react": "^0.82.2",
+    "y-indexeddb": "^9.0.9",
     "y-websocket": "^1.4.5",
     "yjs": "^13.5.41"
   },

@@ -37,6 +37,7 @@ specifiers:
   webpack: ^5.74.0
   webpack-cli: ^4.10.0
   webpack-dev-server: ^4.11.0
+  y-indexeddb: ^9.0.9
   y-websocket: ^1.4.5
   yjs: ^13.5.41
 
@@ -50,6 +51,7 @@ dependencies:
   react-redux: 8.0.2_uyfbmxhdwfup574gfu3al6lriq
   slate: 0.82.1
   slate-react: 0.82.2_lryiyh7uo2ykhysveiorwwrgwa
+  y-indexeddb: 9.0.9_yjs@13.5.41
   y-websocket: 1.4.5_yjs@13.5.41
   yjs: 13.5.41
 
@@ -4707,6 +4709,15 @@ packages:
     engines: {node: '>=0.4'}
     dev: false
     optional: true
+
+  /y-indexeddb/9.0.9_yjs@13.5.41:
+    resolution: {integrity: sha512-GcJbiJa2eD5hankj46Hea9z4hbDnDjvh1fT62E5SpZRsv8GcEemw34l1hwI2eknGcv5Ih9JfusT37JLx9q3LFg==}
+    peerDependencies:
+      yjs: ^13.0.0
+    dependencies:
+      lib0: 0.2.52
+      yjs: 13.5.41
+    dev: false
 
   /y-leveldb/0.1.1_yjs@13.5.41:
     resolution: {integrity: sha512-L8Q0MQmxCQ0qWIOuPzLbWn95TNhrCI7M6LaHnilU4I2IX08e4Dmfg5Tgy4JZ3tnl2aiuZyDOJplHl/msIB/IsA==}
