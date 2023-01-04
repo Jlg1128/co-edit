@@ -11,6 +11,8 @@ type SyncProps = {
 
 function textAreaSyncToYText({yText, textarea, undoManager, db}: SyncProps) {
   let range = [0, 0];
+  let relPos1: Y.RelativePosition = null;
+  let relPos2: Y.RelativePosition = null;
 
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
   let val = getVal();
@@ -33,9 +35,12 @@ function textAreaSyncToYText({yText, textarea, undoManager, db}: SyncProps) {
   const yDoc = yText.doc;
 
   function yTextObserveHandler(event: Y.YTextEvent, transaction: Y.Transaction) {
-    const origin = transaction.origin;
+    const {origin} = transaction;
     if (origin instanceof WebsocketProvider) {
       textarea.value = yText.toString();
+      const absPos1 = Y.createAbsolutePositionFromRelativePosition(relPos1, yDoc);
+      const absPos2 = Y.createAbsolutePositionFromRelativePosition(relPos2, yDoc);
+      textarea.setSelectionRange(absPos1.index, absPos2.index);
     }
   }
 
@@ -65,6 +70,7 @@ function textAreaSyncToYText({yText, textarea, undoManager, db}: SyncProps) {
     textarea.setSelectionRange(newRange[0], newRange[1]);
     console.log('yText', yText.toJSON());
   }
+
   function handleKeyDown(e: KeyboardEvent) {
     setRange();
     setVal();
@@ -75,17 +81,25 @@ function textAreaSyncToYText({yText, textarea, undoManager, db}: SyncProps) {
     textarea.addEventListener('keydown', handleKeyDown);
   }
 
+  function beforeTransactionListener() {
+    const beforeRange = getRange();
+    relPos1 = Y.createRelativePositionFromTypeIndex(yText, beforeRange[0]);
+    relPos2 = Y.createRelativePositionFromTypeIndex(yText, beforeRange[1]);
+  }
+
   db.on('synced', (idbPersistence: IndexeddbPersistence) => {
     // @ts-ignore
     window.idbPersistence = idbPersistence;
     textarea.value = yText.toString();
     yText.observe(yTextObserveHandler);
+    yDoc.on('beforeAllTransactions', beforeTransactionListener);
   });
 
   return () => {
     textarea.removeEventListener('input', handleInput);
     textarea.removeEventListener('keydown', handleKeyDown);
     yText.unobserve(yTextObserveHandler);
+    yDoc.off('beforeAllTransactions', beforeTransactionListener);
   };
 }
 
