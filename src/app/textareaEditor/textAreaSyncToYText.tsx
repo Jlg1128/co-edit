@@ -1,32 +1,34 @@
 import * as Y from 'yjs';
-import { IndexeddbPersistence } from 'y-indexeddb';
 import { WebsocketProvider } from 'y-websocket';
+import * as awarenessProtocol from 'y-protocols/awareness';
 
 type SyncProps = {
   yText: Y.Text,
   textarea: HTMLTextAreaElement,
   undoManager: Y.UndoManager,
-  db: IndexeddbPersistence,
+  awareness: awarenessProtocol.Awareness
 }
 
-function textAreaSyncToYText({yText, textarea, undoManager, db}: SyncProps) {
+function textAreaSyncToYText({yText, textarea, undoManager, awareness}: SyncProps) {
   let range = [0, 0];
   let relPos1: Y.RelativePosition = null;
   let relPos2: Y.RelativePosition = null;
 
-  // eslint-disable-next-line @typescript-eslint/no-use-before-define
-  let val = getVal();
-
   function getVal() {
     return textarea?.value || '';
   }
+
+  let val = getVal();
+
   function setVal() {
     val = getVal();
     return val;
   }
+
   function getRange() {
     return [textarea.selectionStart, textarea.selectionEnd];
   }
+
   function setRange() {
     range = getRange();
     return range;
@@ -46,7 +48,6 @@ function textAreaSyncToYText({yText, textarea, undoManager, db}: SyncProps) {
 
   function handleInput(e: InputEvent) {
     const {inputType, data} = e;
-    console.log('InputEvent', e);
     const newVal = getVal();
     const newRange = getRange();
     if (inputType.startsWith('insert')) {
@@ -68,7 +69,6 @@ function textAreaSyncToYText({yText, textarea, undoManager, db}: SyncProps) {
     }
     textarea.value = yText.toString();
     textarea.setSelectionRange(newRange[0], newRange[1]);
-    console.log('yText', yText.toJSON());
   }
 
   function handleKeyDown(e: KeyboardEvent) {
@@ -76,9 +76,14 @@ function textAreaSyncToYText({yText, textarea, undoManager, db}: SyncProps) {
     setVal();
   }
 
+  function handleSelectionChange(e) {
+    awareness.setLocalStateField('selectionRange', getRange());
+  }
+
   if (textarea) {
     textarea.addEventListener('input', handleInput);
     textarea.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('selectionchange', handleSelectionChange);
   }
 
   function beforeTransactionListener() {
@@ -87,17 +92,13 @@ function textAreaSyncToYText({yText, textarea, undoManager, db}: SyncProps) {
     relPos2 = Y.createRelativePositionFromTypeIndex(yText, beforeRange[1]);
   }
 
-  db.on('synced', (idbPersistence: IndexeddbPersistence) => {
-    // @ts-ignore
-    window.idbPersistence = idbPersistence;
-    textarea.value = yText.toString();
-    yText.observe(yTextObserveHandler);
-    yDoc.on('beforeAllTransactions', beforeTransactionListener);
-  });
+  yText.observe(yTextObserveHandler);
+  yDoc.on('beforeAllTransactions', beforeTransactionListener);
 
   return () => {
     textarea.removeEventListener('input', handleInput);
     textarea.removeEventListener('keydown', handleKeyDown);
+    document.removeEventListener('selectionchange', handleSelectionChange);
     yText.unobserve(yTextObserveHandler);
     yDoc.off('beforeAllTransactions', beforeTransactionListener);
   };

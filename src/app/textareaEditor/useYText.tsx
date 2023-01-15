@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import * as Y from 'yjs';
 
 export default function useYText({name, defaultValue = '', doc}) {

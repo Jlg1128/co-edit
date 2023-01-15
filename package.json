@@ -24,6 +24,8 @@
     "slate": "^0.82.1",
     "slate-react": "^0.82.2",
     "y-indexeddb": "^9.0.9",
+    "y-protocols": "^1.0.5",
+    "y-webrtc": "^10.2.3",
     "y-websocket": "^1.4.5",
     "yjs": "^13.5.41"
   },

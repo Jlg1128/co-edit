@@ -123,7 +123,7 @@ window.Transforms = Transforms;
 const wsProvider = new WebsocketProvider('ws://localhost:1234', 'my-roomname', yDoc);
 
 wsProvider.on('status', event => {
-  console.log(event.status) // logs "connected" or "disconnected"
+  console.log(event.status); // logs "connected" or "disconnected"
 });
 
 const MainEditor = () => {
@@ -138,7 +138,6 @@ const MainEditor = () => {
   }, []);
 
   const editor = useMemo(() => withYjs(withReact(createEditor()), sharedType), []);
-  // const editor = useMemo(() => withReact(createEditor()), []);
 
   useEffect(() => {
     // @ts-ignore
